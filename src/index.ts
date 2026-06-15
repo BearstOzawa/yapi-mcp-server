@@ -15,7 +15,7 @@ async function main(): Promise<void> {
     baseUrl: config.baseUrl,
     hasToken: Boolean(config.token),
     hasCookie: Boolean(config.cookie),
-    projectId: config.projectId,
+    tokenProjects: config.tokenProjects.length,
     timeoutMs: config.timeoutMs,
   });
 

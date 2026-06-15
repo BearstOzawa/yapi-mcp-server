@@ -10,7 +10,7 @@ import type {
 
 export interface ListInterfacesParams extends Record<string, unknown> {
   project_id?: number;
-  project?: string;
+  project?: ProjectRef;
   catid?: number;
   page?: number;
   limit?: number | "all";
@@ -102,7 +102,7 @@ export class YapiService {
 
   async searchInterfaces(params: {
     project_id: number;
-    project?: string;
+    project?: ProjectRef;
     keyword: string;
     limit?: number;
   }): Promise<YapiResponse<YapiInterfaceSummary[]>> {
@@ -139,7 +139,7 @@ export class YapiService {
     query?: Record<string, unknown>;
     body?: Record<string, unknown>;
     allow_api_error?: boolean;
-    project?: string;
+    project?: ProjectRef;
   }): Promise<YapiResponse<unknown>> {
     if (params.method === "GET") {
       return this.client.get<unknown>(params.path, {

@@ -9,7 +9,7 @@
 - 基于官方 `@modelcontextprotocol/sdk` 构建，支持标准 stdio MCP 传输。
 - 支持通过 `npx -y @bearst/yapi-mcp-server` 启动。
 - 支持项目 Token 和浏览器 Cookie 两种认证方式。
-- 支持单项目和多项目配置，项目可通过 ID 或别名选择。
+- 支持单项目和多项目 Token，格式简单直观。
 - 支持读取项目、分类、接口菜单、接口列表和接口详情。
 - 支持按标题、路径、方法搜索接口。
 - 支持创建分类、创建接口、更新接口、保存接口。
@@ -17,8 +17,6 @@
 - 提供 `yapi_raw_request` 作为高级扩展工具，用于兼容自定义 YApi API。
 
 ## 快速开始
-
-npm 包方式：
 
 ```bash
 npx -y @bearst/yapi-mcp-server
@@ -32,90 +30,69 @@ npx -y github:BearstOzawa/yapi-mcp-server
 
 ## Codex 配置
 
-npm 包方式：
+单项目 Token：
 
-```toml
-[mcp_servers.yapi]
-command = "npx"
-args = ["-y", "@bearst/yapi-mcp-server"]
-startup_timeout_sec = 60
-
-[mcp_servers.yapi.env]
-YAPI_BASE_URL = "https://your-yapi.example.com"
-YAPI_PROJECT_ID = "40"
-YAPI_TOKEN = "project-token"
-YAPI_DEBUG = "false"
-```
-
-GitHub 方式：
-
-```toml
-[mcp_servers.yapi]
-command = "npx"
-args = ["-y", "github:BearstOzawa/yapi-mcp-server"]
-startup_timeout_sec = 120
-
-[mcp_servers.yapi.env]
-YAPI_BASE_URL = "https://your-yapi.example.com"
-YAPI_PROJECT_ID = "40"
-YAPI_TOKEN = "project-token"
-YAPI_DEBUG = "false"
-```
-
-Cookie 方式：
-
-```toml
-[mcp_servers.yapi.env]
-YAPI_BASE_URL = "https://your-yapi.example.com"
-YAPI_COOKIE = "_yapi_token=xxx; _yapi_uid=158"
-YAPI_DEBUG = "false"
-```
-
-多项目 Token 简写：
-
-```toml
-[mcp_servers.yapi.env]
-YAPI_BASE_URL = "https://your-yapi.example.com"
-YAPI_DEFAULT_PROJECT = "40"
-YAPI_TOKEN = "40:project-token-a,41:project-token-b"
-YAPI_DEBUG = "false"
-```
-
-多项目完整配置：
-
-```toml
-[mcp_servers.yapi.env]
-YAPI_BASE_URL = "https://your-yapi.example.com"
-YAPI_DEFAULT_PROJECT = "city-brain"
-YAPI_PROJECTS = '''
-[
-  {
-    "id": 40,
-    "name": "city-brain",
-    "token": "project-token-a"
-  },
-  {
-    "id": 41,
-    "name": "traffic",
-    "token": "project-token-b",
-    "cookie": "_yapi_token=xxx; _yapi_uid=158"
+```json
+{
+  "command": "npx",
+  "args": ["-y", "@bearst/yapi-mcp-server"],
+  "env": {
+    "YAPI_BASE_URL": "https://your-yapi.example.com",
+    "YAPI_TOKEN": "project-token"
   }
-]
-'''
+}
+```
+
+带项目 ID 的 Token：
+
+```json
+{
+  "command": "npx",
+  "args": ["-y", "@bearst/yapi-mcp-server"],
+  "env": {
+    "YAPI_BASE_URL": "https://your-yapi.example.com",
+    "YAPI_TOKEN": "40:project-token"
+  }
+}
+```
+
+多项目 Token：
+
+```json
+{
+  "command": "npx",
+  "args": ["-y", "@bearst/yapi-mcp-server"],
+  "env": {
+    "YAPI_BASE_URL": "https://your-yapi.example.com",
+    "YAPI_TOKEN": "40:project-token-a,41:project-token-b"
+  }
+}
+```
+
+Cookie：
+
+```json
+{
+  "command": "npx",
+  "args": ["-y", "@bearst/yapi-mcp-server"],
+  "env": {
+    "YAPI_BASE_URL": "https://your-yapi.example.com",
+    "YAPI_COOKIE": "_yapi_token=xxx; _yapi_uid=158"
+  }
+}
 ```
 
 ## 环境变量
 
-`YAPI_TOKEN`、`YAPI_COOKIE`、`YAPI_PROJECTS` 至少设置一个。
+`YAPI_TOKEN` 和 `YAPI_COOKIE` 至少设置一个。
 
 - `YAPI_BASE_URL`：YApi 服务地址，例如 `https://yapi.example.com`。
-- `YAPI_PROJECT_ID`：可选的默认项目 ID，设置后项目级工具调用可以省略 `project_id`。
-- `YAPI_DEFAULT_PROJECT`：可选的默认项目别名或 ID，优先用于多项目配置。
-- `YAPI_PROJECTS`：可选的多项目 JSON 数组，每个项目支持 `id`、`name`、`baseUrl`、`token`、`cookie`。
-- `YAPI_TOKEN`：YApi 项目 Token。支持单项目 token，也支持 `项目ID:token,项目ID:token` 多项目简写。
+- `YAPI_TOKEN`：YApi 项目 Token。支持普通 token，也支持 `项目ID:token,项目ID:token` 多项目格式。
 - `YAPI_COOKIE`：YApi 登录态 Cookie，例如 `_yapi_token=...; _yapi_uid=...`。
 - `YAPI_REQUEST_TIMEOUT_MS`：可选的请求超时时间，默认 `30000`。
 - `YAPI_DEBUG`：可选调试日志，输出到 stderr，不打印 token 和 cookie 原文。
+
+如果 `YAPI_TOKEN` 只配置了一个 `项目ID:token`，该项目会自动作为默认项目。多项目时，项目级工具需要传 `project_id`。
 
 ## 工具
 
@@ -155,8 +132,7 @@ npm run lint
 
 ```bash
 YAPI_BASE_URL="https://your-yapi.example.com" \
-YAPI_PROJECT_ID="40" \
-YAPI_TOKEN="project-token" \
+YAPI_TOKEN="40:project-token" \
 npm run dev
 ```
 
@@ -170,7 +146,7 @@ A modern MCP server for YApi. It is designed to be easy to configure, convenient
 - Standard stdio MCP transport.
 - Starts with `npx -y @bearst/yapi-mcp-server`.
 - Supports project token and browser cookie authentication.
-- Supports single-project and multi-project configuration. Projects can be selected by ID or alias.
+- Supports single-project and multi-project tokens with a simple format.
 - Reads projects, categories, interface menus, interface lists, and interface details.
 - Searches interfaces by title, path, or method.
 - Creates categories and creates, updates, or saves interfaces.
@@ -178,8 +154,6 @@ A modern MCP server for YApi. It is designed to be easy to configure, convenient
 - Provides `yapi_raw_request` as an advanced extension tool for custom YApi APIs.
 
 ## Quick Start
-
-npm package:
 
 ```bash
 npx -y @bearst/yapi-mcp-server
@@ -193,90 +167,69 @@ npx -y github:BearstOzawa/yapi-mcp-server
 
 ## Codex Configuration
 
-npm package:
+Single project token:
 
-```toml
-[mcp_servers.yapi]
-command = "npx"
-args = ["-y", "@bearst/yapi-mcp-server"]
-startup_timeout_sec = 60
-
-[mcp_servers.yapi.env]
-YAPI_BASE_URL = "https://your-yapi.example.com"
-YAPI_PROJECT_ID = "40"
-YAPI_TOKEN = "project-token"
-YAPI_DEBUG = "false"
-```
-
-Cookie authentication:
-
-```toml
-[mcp_servers.yapi.env]
-YAPI_BASE_URL = "https://your-yapi.example.com"
-YAPI_COOKIE = "_yapi_token=xxx; _yapi_uid=158"
-YAPI_DEBUG = "false"
-```
-
-Multi-project token shorthand:
-
-```toml
-[mcp_servers.yapi.env]
-YAPI_BASE_URL = "https://your-yapi.example.com"
-YAPI_DEFAULT_PROJECT = "40"
-YAPI_TOKEN = "40:project-token-a,41:project-token-b"
-YAPI_DEBUG = "false"
-```
-
-Full multi-project configuration:
-
-```toml
-[mcp_servers.yapi.env]
-YAPI_BASE_URL = "https://your-yapi.example.com"
-YAPI_DEFAULT_PROJECT = "city-brain"
-YAPI_PROJECTS = '''
-[
-  {
-    "id": 40,
-    "name": "city-brain",
-    "token": "project-token-a"
-  },
-  {
-    "id": 41,
-    "name": "traffic",
-    "token": "project-token-b",
-    "cookie": "_yapi_token=xxx; _yapi_uid=158"
+```json
+{
+  "command": "npx",
+  "args": ["-y", "@bearst/yapi-mcp-server"],
+  "env": {
+    "YAPI_BASE_URL": "https://your-yapi.example.com",
+    "YAPI_TOKEN": "project-token"
   }
-]
-'''
+}
 ```
 
-GitHub package:
+Token with project ID:
 
-```toml
-[mcp_servers.yapi]
-command = "npx"
-args = ["-y", "github:BearstOzawa/yapi-mcp-server"]
-startup_timeout_sec = 120
+```json
+{
+  "command": "npx",
+  "args": ["-y", "@bearst/yapi-mcp-server"],
+  "env": {
+    "YAPI_BASE_URL": "https://your-yapi.example.com",
+    "YAPI_TOKEN": "40:project-token"
+  }
+}
+```
 
-[mcp_servers.yapi.env]
-YAPI_BASE_URL = "https://your-yapi.example.com"
-YAPI_PROJECT_ID = "40"
-YAPI_TOKEN = "project-token"
-YAPI_DEBUG = "false"
+Multi-project token:
+
+```json
+{
+  "command": "npx",
+  "args": ["-y", "@bearst/yapi-mcp-server"],
+  "env": {
+    "YAPI_BASE_URL": "https://your-yapi.example.com",
+    "YAPI_TOKEN": "40:project-token-a,41:project-token-b"
+  }
+}
+```
+
+Cookie:
+
+```json
+{
+  "command": "npx",
+  "args": ["-y", "@bearst/yapi-mcp-server"],
+  "env": {
+    "YAPI_BASE_URL": "https://your-yapi.example.com",
+    "YAPI_COOKIE": "_yapi_token=xxx; _yapi_uid=158"
+  }
+}
 ```
 
 ## Environment Variables
 
-Set at least one of `YAPI_TOKEN`, `YAPI_COOKIE`, and `YAPI_PROJECTS`.
+Set at least one of `YAPI_TOKEN` and `YAPI_COOKIE`.
 
 - `YAPI_BASE_URL`: YApi base URL, for example `https://yapi.example.com`.
-- `YAPI_PROJECT_ID`: optional default project ID, so project-scoped tool calls can omit `project_id`.
-- `YAPI_DEFAULT_PROJECT`: optional default project alias or ID, mainly for multi-project setup.
-- `YAPI_PROJECTS`: optional multi-project JSON array. Each item supports `id`, `name`, `baseUrl`, `token`, and `cookie`.
-- `YAPI_TOKEN`: YApi project token. Supports a single token or `projectId:token,projectId:token` multi-project shorthand.
+- `YAPI_TOKEN`: YApi project token. Supports a plain token or `projectId:token,projectId:token`.
 - `YAPI_COOKIE`: YApi login cookie, for example `_yapi_token=...; _yapi_uid=...`.
 - `YAPI_REQUEST_TIMEOUT_MS`: optional request timeout, default `30000`.
 - `YAPI_DEBUG`: optional request logging to stderr. Token and cookie values are not printed.
+
+If `YAPI_TOKEN` contains exactly one `projectId:token`, that project is used as the default project automatically. With multiple projects, project-scoped tools should pass `project_id`.
 
 ## Tools
 
@@ -316,7 +269,6 @@ Run locally:
 
 ```bash
 YAPI_BASE_URL="https://your-yapi.example.com" \
-YAPI_PROJECT_ID="40" \
-YAPI_TOKEN="project-token" \
+YAPI_TOKEN="40:project-token" \
 npm run dev
 ```

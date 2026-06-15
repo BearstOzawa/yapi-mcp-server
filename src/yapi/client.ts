@@ -57,7 +57,7 @@ export class YapiClient {
     this.logger.debug("request", {
       method,
       url: this.redactUrl(url.toString()),
-      project: project.name ?? project.id,
+      project: project.id,
       hasCookie: Boolean(project.cookie),
     });
 
