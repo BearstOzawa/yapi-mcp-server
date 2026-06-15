@@ -2,10 +2,12 @@ import { z } from "zod";
 
 export const projectIdSchema = z.object({
   project_id: z.number().int().positive().optional().describe("YApi project ID. Defaults to YAPI_PROJECT_ID."),
+  project: z.string().min(1).optional().describe("Configured project name or ID from YAPI_PROJECTS."),
 });
 
 export const listInterfacesSchema = z.object({
   project_id: z.number().int().positive().optional().describe("YApi project ID. Defaults to YAPI_PROJECT_ID."),
+  project: z.string().min(1).optional().describe("Configured project name or ID from YAPI_PROJECTS."),
   page: z.number().int().positive().optional().default(1),
   limit: z.union([z.number().int().positive(), z.literal("all")]).optional().default(20),
   status: z.union([z.string(), z.array(z.string())]).optional(),
@@ -13,6 +15,7 @@ export const listInterfacesSchema = z.object({
 });
 
 export const listCategorySchema = z.object({
+  project: z.string().min(1).optional().describe("Configured project name or ID from YAPI_PROJECTS."),
   catid: z.number().int().positive(),
   page: z.number().int().positive().optional().default(1),
   limit: z.union([z.number().int().positive(), z.literal("all")]).optional().default(20),
@@ -21,17 +24,20 @@ export const listCategorySchema = z.object({
 });
 
 export const interfaceIdSchema = z.object({
+  project: z.string().min(1).optional().describe("Configured project name or ID from YAPI_PROJECTS."),
   id: z.number().int().positive().describe("YApi interface ID."),
 });
 
 export const searchSchema = z.object({
   project_id: z.number().int().positive().optional().describe("YApi project ID. Defaults to YAPI_PROJECT_ID."),
+  project: z.string().min(1).optional().describe("Configured project name or ID from YAPI_PROJECTS."),
   keyword: z.string().min(1),
   limit: z.number().int().positive().max(200).optional().default(30),
 });
 
 export const addCategorySchema = z.object({
   project_id: z.number().int().positive().optional().describe("YApi project ID. Defaults to YAPI_PROJECT_ID."),
+  project: z.string().min(1).optional().describe("Configured project name or ID from YAPI_PROJECTS."),
   name: z.string().min(1),
   desc: z.string().optional(),
 });
@@ -40,6 +46,7 @@ export const interfacePayloadSchema = z
   .object({
     id: z.number().int().positive().optional().describe("Required for update/save existing interface."),
     project_id: z.number().int().positive().optional().describe("YApi project ID. Defaults to YAPI_PROJECT_ID."),
+    project: z.string().min(1).optional().describe("Configured project name or ID from YAPI_PROJECTS."),
     catid: z.number().int().positive().optional(),
     title: z.string().min(1).optional(),
     path: z.string().min(1).optional(),
@@ -61,6 +68,7 @@ export const interfacePayloadSchema = z
 export const importDataSchema = z
   .object({
     project_id: z.number().int().positive().optional().describe("YApi project ID. Defaults to YAPI_PROJECT_ID."),
+    project: z.string().min(1).optional().describe("Configured project name or ID from YAPI_PROJECTS."),
     data: z.string().min(1).describe("Import payload, usually JSON string such as swagger/openapi data."),
     type: z.string().optional().default("swagger"),
     merge: z.union([z.string(), z.boolean()]).optional(),
@@ -78,4 +86,5 @@ export const rawRequestSchema = z.object({
   query: z.record(z.unknown()).optional(),
   body: z.record(z.unknown()).optional(),
   allow_api_error: z.boolean().optional(),
+  project: z.string().min(1).optional().describe("Configured project name or ID from YAPI_PROJECTS."),
 });

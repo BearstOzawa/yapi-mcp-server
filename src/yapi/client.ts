@@ -1,5 +1,5 @@
 import type { Logger } from "../logger.js";
-import type { ServerConfig } from "../config.js";
+import { resolveProject, type ProjectRef, type ResolvedProject, type ServerConfig } from "../config.js";
 import { YapiApiError, YapiHttpError } from "./errors.js";
 import type { YapiResponse } from "./types.js";
 
@@ -8,6 +8,7 @@ export interface RequestOptions {
   body?: Record<string, unknown>;
   requireToken?: boolean;
   allowApiError?: boolean;
+  project?: ProjectRef;
 }
 
 const commonHeaders = {
@@ -34,11 +35,12 @@ export class YapiClient {
     path: string,
     options: RequestOptions = {},
   ): Promise<YapiResponse<T>> {
-    const url = this.buildUrl(path, options.query, options.requireToken);
+    const project = resolveProject(this.config, options.project);
+    const url = this.buildUrl(path, options.query, options.requireToken, project);
     const headers: Record<string, string> = { ...commonHeaders };
 
-    if (this.config.cookie) {
-      headers.Cookie = this.config.cookie;
+    if (project.cookie) {
+      headers.Cookie = project.cookie;
     }
 
     const init: RequestInit = {
@@ -49,13 +51,14 @@ export class YapiClient {
 
     if (method === "POST") {
       headers["Content-Type"] = "application/json";
-      init.body = JSON.stringify(this.withToken(options.body ?? {}, options.requireToken));
+      init.body = JSON.stringify(this.withToken(options.body ?? {}, options.requireToken, project));
     }
 
     this.logger.debug("request", {
       method,
       url: this.redactUrl(url.toString()),
-      hasCookie: Boolean(this.config.cookie),
+      project: project.name ?? project.id,
+      hasCookie: Boolean(project.cookie),
     });
 
     const response = await fetch(url, init);
@@ -86,10 +89,11 @@ export class YapiClient {
     path: string,
     query: Record<string, unknown> | undefined,
     requireToken = true,
+    project: ResolvedProject,
   ): URL {
     const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-    const url = new URL(`${this.config.baseUrl}${normalizedPath}`);
-    const params = this.withToken(query ?? {}, requireToken);
+    const url = new URL(`${project.baseUrl}${normalizedPath}`);
+    const params = this.withToken(query ?? {}, requireToken, project);
 
     for (const [key, value] of Object.entries(params)) {
       appendSearchParam(url, key, value);
@@ -101,13 +105,14 @@ export class YapiClient {
   private withToken(
     params: Record<string, unknown>,
     requireToken = true,
+    project: ResolvedProject,
   ): Record<string, unknown> {
-    if (!requireToken || !this.config.token || params.token !== undefined) {
+    if (!requireToken || !project.token || params.token !== undefined) {
       return params;
     }
 
     return {
-      token: this.config.token,
+      token: project.token,
       ...params,
     };
   }

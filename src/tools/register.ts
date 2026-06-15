@@ -1,6 +1,11 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { ServerConfig } from "../config.js";
+import {
+  listConfiguredProjects,
+  resolveProject,
+  type ProjectRef,
+  type ServerConfig,
+} from "../config.js";
 import { YapiService } from "../yapi/service.js";
 import {
   addCategorySchema,
@@ -22,6 +27,16 @@ export function registerYapiTools(
   config: ServerConfig,
 ): void {
   server.registerTool(
+    "yapi_list_configured_projects",
+    {
+      title: "List configured YApi projects",
+      description: "List configured YApi projects without exposing token or cookie values.",
+      annotations: { readOnlyHint: true, destructiveHint: false },
+    },
+    async () => asJson(listConfiguredProjects(config)),
+  );
+
+  server.registerTool(
     "yapi_get_project",
     {
       title: "Get YApi project",
@@ -29,7 +44,10 @@ export function registerYapiTools(
       inputSchema: projectIdSchema.shape,
       annotations: { readOnlyHint: true, destructiveHint: false },
     },
-    async (args) => asJson(await service.getProject(requireProjectId(args.project_id, config))),
+    async (args) => {
+      const target = resolveToolProject(config, args.project, args.project_id);
+      return asJson(await service.getProject(target.id, target.ref));
+    },
   );
 
   server.registerTool(
@@ -40,7 +58,10 @@ export function registerYapiTools(
       inputSchema: projectIdSchema.shape,
       annotations: { readOnlyHint: true, destructiveHint: false },
     },
-    async (args) => asJson(await service.getCategoryMenu(requireProjectId(args.project_id, config))),
+    async (args) => {
+      const target = resolveToolProject(config, args.project, args.project_id);
+      return asJson(await service.getCategoryMenu(target.id, target.ref));
+    },
   );
 
   server.registerTool(
@@ -51,7 +72,10 @@ export function registerYapiTools(
       inputSchema: projectIdSchema.shape,
       annotations: { readOnlyHint: true, destructiveHint: false },
     },
-    async (args) => asJson(await service.listMenu(requireProjectId(args.project_id, config))),
+    async (args) => {
+      const target = resolveToolProject(config, args.project, args.project_id);
+      return asJson(await service.listMenu(target.id, target.ref));
+    },
   );
 
   server.registerTool(
@@ -65,8 +89,8 @@ export function registerYapiTools(
     async (args) =>
       asJson(
         await service.listInterfaces({
-          ...args,
-          project_id: requireProjectId(args.project_id, config),
+          ...withoutProjectSelector(args),
+          ...resolveProjectParams(config, args.project, args.project_id),
         }),
       ),
   );
@@ -79,7 +103,13 @@ export function registerYapiTools(
       inputSchema: listCategorySchema.shape,
       annotations: { readOnlyHint: true, destructiveHint: false },
     },
-    async (args) => asJson(await service.listInterfacesByCategory(args)),
+    async (args) =>
+      asJson(
+        await service.listInterfacesByCategory({
+          ...withoutProjectSelector(args),
+          project: args.project,
+        }),
+      ),
   );
 
   server.registerTool(
@@ -93,8 +123,8 @@ export function registerYapiTools(
     async (args) =>
       asJson(
         await service.searchInterfaces({
-          ...args,
-          project_id: requireProjectId(args.project_id, config),
+          ...withoutProjectSelector(args),
+          ...resolveProjectParams(config, args.project, args.project_id),
         }),
       ),
   );
@@ -107,7 +137,7 @@ export function registerYapiTools(
       inputSchema: interfaceIdSchema.shape,
       annotations: { readOnlyHint: true, destructiveHint: false },
     },
-    async (args) => asJson(await service.getInterface(args.id)),
+    async (args) => asJson(await service.getInterface(args.id, args.project)),
   );
 
   server.registerTool(
@@ -118,13 +148,18 @@ export function registerYapiTools(
       inputSchema: addCategorySchema.shape,
       annotations: { readOnlyHint: false, destructiveHint: false },
     },
-    async (args) =>
-      asJson(
-        await service.addCategory({
-          ...args,
-          project_id: requireProjectId(args.project_id, config),
-        }),
-      ),
+    async (args) => {
+      const target = resolveToolProject(config, args.project, args.project_id);
+      return asJson(
+        await service.addCategory(
+          {
+            ...withoutProjectName(args),
+            project_id: target.id,
+          },
+          target.ref,
+        ),
+      );
+    },
   );
 
   server.registerTool(
@@ -135,13 +170,18 @@ export function registerYapiTools(
       inputSchema: interfacePayloadSchema.shape,
       annotations: { readOnlyHint: false, destructiveHint: false },
     },
-    async (args) =>
-      asJson(
-        await service.addInterface({
-          ...args,
-          project_id: requireProjectId(args.project_id, config),
-        }),
-      ),
+    async (args) => {
+      const target = resolveToolProject(config, args.project, args.project_id);
+      return asJson(
+        await service.addInterface(
+          {
+            ...withoutProjectName(args),
+            project_id: target.id,
+          },
+          target.ref,
+        ),
+      );
+    },
   );
 
   server.registerTool(
@@ -152,7 +192,18 @@ export function registerYapiTools(
       inputSchema: interfacePayloadSchema.shape,
       annotations: { readOnlyHint: false, destructiveHint: false },
     },
-    async (args) => asJson(await service.updateInterface(args)),
+    async (args) => {
+      const target = args.project ? resolveToolProject(config, args.project, args.project_id) : undefined;
+      return asJson(
+        await service.updateInterface(
+          {
+            ...withoutProjectName(args),
+            ...(target?.id && !args.project_id ? { project_id: target.id } : {}),
+          },
+          target?.ref,
+        ),
+      );
+    },
   );
 
   server.registerTool(
@@ -163,7 +214,18 @@ export function registerYapiTools(
       inputSchema: interfacePayloadSchema.shape,
       annotations: { readOnlyHint: false, destructiveHint: false },
     },
-    async (args) => asJson(await service.saveInterface(args)),
+    async (args) => {
+      const target = args.project ? resolveToolProject(config, args.project, args.project_id) : undefined;
+      return asJson(
+        await service.saveInterface(
+          {
+            ...withoutProjectName(args),
+            ...(target?.id && !args.project_id ? { project_id: target.id } : {}),
+          },
+          target?.ref,
+        ),
+      );
+    },
   );
 
   server.registerTool(
@@ -174,13 +236,18 @@ export function registerYapiTools(
       inputSchema: importDataSchema.shape,
       annotations: { readOnlyHint: false, destructiveHint: false },
     },
-    async (args) =>
-      asJson(
-        await service.importData({
-          ...args,
-          project_id: requireProjectId(args.project_id, config),
-        }),
-      ),
+    async (args) => {
+      const target = resolveToolProject(config, args.project, args.project_id);
+      return asJson(
+        await service.importData(
+          {
+            ...withoutProjectName(args),
+            project_id: target.id,
+          },
+          target.ref,
+        ),
+      );
+    },
   );
 
   server.registerTool(
@@ -196,12 +263,47 @@ export function registerYapiTools(
   );
 }
 
-function requireProjectId(value: number | undefined, config: ServerConfig): number {
-  const projectId = value ?? config.projectId;
-  if (!projectId) {
+function resolveToolProject(
+  config: ServerConfig,
+  project: string | undefined,
+  projectId: number | undefined,
+): { id: number; ref: ProjectRef } {
+  const ref = project ?? projectId;
+  const resolved = resolveProject(config, ref);
+  if (!resolved.id) {
     throw new Error("project_id is required. Pass project_id or set YAPI_PROJECT_ID.");
   }
-  return projectId;
+  return {
+    id: resolved.id,
+    ref: ref ?? resolved.id,
+  };
+}
+
+function resolveProjectParams(
+  config: ServerConfig,
+  project: string | undefined,
+  projectId: number | undefined,
+): { project_id: number; project?: string } {
+  const resolved = resolveToolProject(config, project, projectId);
+  return {
+    project_id: resolved.id,
+    project,
+  };
+}
+
+function withoutProjectSelector<T extends { project?: unknown; project_id?: unknown }>(
+  value: T,
+): Omit<T, "project" | "project_id"> {
+  const rest = { ...value };
+  delete rest.project;
+  delete rest.project_id;
+  return rest;
+}
+
+function withoutProjectName<T extends { project?: unknown }>(value: T): Omit<T, "project"> {
+  const rest = { ...value };
+  delete rest.project;
+  return rest;
 }
 
 function asJson(value: unknown): ToolResult {
