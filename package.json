@@ -1,6 +1,6 @@
 {
   "name": "@bearst/yapi-mcp-server",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A robust MCP server for YApi with token and cookie authentication.",
   "type": "module",
   "homepage": "https://github.com/BearstOzawa/yapi-mcp-server#readme",
