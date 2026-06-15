@@ -7,7 +7,7 @@
 ## 特性
 
 - 基于官方 `@modelcontextprotocol/sdk` 构建，支持标准 stdio MCP 传输。
-- 支持通过 `npx -y @bearstozawa/yapi-mcp-server` 启动。
+- 支持通过 `npx -y @bearst/yapi-mcp-server` 启动。
 - 支持项目 Token 和浏览器 Cookie 两种认证方式。
 - 支持单项目和多项目配置，项目可通过 ID 或别名选择。
 - 支持读取项目、分类、接口菜单、接口列表和接口详情。
@@ -21,7 +21,7 @@
 npm 包方式：
 
 ```bash
-npx -y @bearstozawa/yapi-mcp-server
+npx -y @bearst/yapi-mcp-server
 ```
 
 GitHub 方式：
@@ -37,7 +37,7 @@ npm 包方式：
 ```toml
 [mcp_servers.yapi]
 command = "npx"
-args = ["-y", "@bearstozawa/yapi-mcp-server"]
+args = ["-y", "@bearst/yapi-mcp-server"]
 startup_timeout_sec = 60
 
 [mcp_servers.yapi.env]
@@ -168,7 +168,7 @@ A modern MCP server for YApi. It is designed to be easy to configure, convenient
 
 - Built with the official `@modelcontextprotocol/sdk`.
 - Standard stdio MCP transport.
-- Starts with `npx -y @bearstozawa/yapi-mcp-server`.
+- Starts with `npx -y @bearst/yapi-mcp-server`.
 - Supports project token and browser cookie authentication.
 - Supports single-project and multi-project configuration. Projects can be selected by ID or alias.
 - Reads projects, categories, interface menus, interface lists, and interface details.
@@ -182,7 +182,7 @@ A modern MCP server for YApi. It is designed to be easy to configure, convenient
 npm package:
 
 ```bash
-npx -y @bearstozawa/yapi-mcp-server
+npx -y @bearst/yapi-mcp-server
 ```
 
 GitHub package:
@@ -198,7 +198,7 @@ npm package:
 ```toml
 [mcp_servers.yapi]
 command = "npx"
-args = ["-y", "@bearstozawa/yapi-mcp-server"]
+args = ["-y", "@bearst/yapi-mcp-server"]
 startup_timeout_sec = 60
 
 [mcp_servers.yapi.env]
