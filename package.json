@@ -1,5 +1,5 @@
 {
-  "name": "yapi-mcp-server",
+  "name": "@bearstozawa/yapi-mcp-server",
   "version": "0.1.0",
   "description": "A robust MCP server for YApi with token and cookie authentication.",
   "type": "module",
