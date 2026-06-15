@@ -93,18 +93,31 @@ export function resolveProject(config: ServerConfig, ref?: ProjectRef): Resolved
   };
 }
 
-export function listConfiguredProjects(config: ServerConfig): Array<{
-  id: number;
+export function getConfigSummary(config: ServerConfig): {
   baseUrl: string;
   hasToken: boolean;
   hasCookie: boolean;
-}> {
-  return config.tokenProjects.map((project) => ({
-    id: project.id,
+  projectIdRequired: boolean;
+  tokenProjects: Array<{
+    id: number;
+    hasToken: boolean;
+  }>;
+  notes: string[];
+} {
+  return {
     baseUrl: config.baseUrl,
-    hasToken: true,
+    hasToken: Boolean(config.token) || config.tokenProjects.length > 0,
     hasCookie: Boolean(config.cookie),
-  }));
+    projectIdRequired: config.tokenProjects.length !== 1,
+    tokenProjects: config.tokenProjects.map((project) => ({
+      id: project.id,
+      hasToken: true,
+    })),
+    notes:
+      config.tokenProjects.length === 0
+        ? ["No project IDs were parsed from YAPI_TOKEN. Pass project_id for project-scoped tools."]
+        : [],
+  };
 }
 
 function parseTokenProjects(raw: string | undefined): TokenProject[] {

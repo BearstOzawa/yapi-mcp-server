@@ -1,6 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { listConfiguredProjects, resolveProject, type ProjectRef, type ServerConfig } from "../config.js";
+import { getConfigSummary, resolveProject, type ProjectRef, type ServerConfig } from "../config.js";
 import { YapiService } from "../yapi/service.js";
 import {
   addCategorySchema,
@@ -24,11 +24,11 @@ export function registerYapiTools(
   server.registerTool(
     "yapi_list_configured_projects",
     {
-      title: "List configured YApi projects",
-      description: "List project IDs parsed from YAPI_TOKEN without exposing token values.",
+      title: "List YApi configuration summary",
+      description: "Show YApi auth configuration summary without exposing token or cookie values.",
       annotations: { readOnlyHint: true, destructiveHint: false },
     },
-    async () => asJson(listConfiguredProjects(config)),
+    async () => asJson(getConfigSummary(config)),
   );
 
   server.registerTool(

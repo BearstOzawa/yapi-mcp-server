@@ -82,6 +82,8 @@ Cookie：
 }
 ```
 
+Cookie 不包含项目 ID。只配置 Cookie 时，查询项目、分类、接口列表等项目级数据需要在工具调用中传 `project_id`。
+
 ## 环境变量
 
 `YAPI_TOKEN` 和 `YAPI_COOKIE` 至少设置一个。
@@ -118,6 +120,8 @@ Cookie：
 高级工具：
 
 - `yapi_raw_request`：调用自定义 `/api/*` 接口，会自动附带已配置的认证信息。
+
+`yapi_list_configured_projects` 会返回当前认证配置摘要，包括 `hasToken`、`hasCookie`、`projectIdRequired` 和从 `YAPI_TOKEN` 中解析出的项目 ID。
 
 ## 开发
 
@@ -219,6 +223,8 @@ Cookie:
 }
 ```
 
+Cookies do not contain project IDs. With cookie-only configuration, project-scoped tools such as project, category, and interface-list queries should pass `project_id`.
+
 ## Environment Variables
 
 Set at least one of `YAPI_TOKEN` and `YAPI_COOKIE`.
@@ -255,6 +261,8 @@ Write tools:
 Advanced:
 
 - `yapi_raw_request`: calls custom `/api/*` endpoints with configured authentication attached.
+
+`yapi_list_configured_projects` returns the current authentication configuration summary, including `hasToken`, `hasCookie`, `projectIdRequired`, and project IDs parsed from `YAPI_TOKEN`.
 
 ## Development
 
