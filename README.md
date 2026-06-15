@@ -130,6 +130,7 @@ npm install
 npm run typecheck
 npm run build
 npm run lint
+npm run smoke
 ```
 
 本地运行：
@@ -139,6 +140,23 @@ YAPI_BASE_URL="https://your-yapi.example.com" \
 YAPI_TOKEN="40:project-token" \
 npm run dev
 ```
+
+## 发布
+
+发布由 GitHub Actions 完成：
+
+1. 在 GitHub 仓库 Settings -> Secrets and variables -> Actions 中添加 `NPM_TOKEN`。
+2. `NPM_TOKEN` 使用 npm granular access token，需具备发布 `@bearst/yapi-mcp-server` 的权限。
+3. 更新 `package.json` 版本并合并到 `main`。
+4. 在 GitHub 创建 Release，或手动运行 `Publish` workflow。
+
+CI 会在 push 和 pull request 时运行：
+
+- `npm ci`
+- `npm run typecheck`
+- `npm run lint`
+- `npm run smoke`
+- `npm pack --dry-run`
 
 ## English
 
@@ -271,6 +289,7 @@ npm install
 npm run typecheck
 npm run build
 npm run lint
+npm run smoke
 ```
 
 Run locally:
@@ -280,3 +299,20 @@ YAPI_BASE_URL="https://your-yapi.example.com" \
 YAPI_TOKEN="40:project-token" \
 npm run dev
 ```
+
+## Publishing
+
+Publishing is handled by GitHub Actions:
+
+1. Add `NPM_TOKEN` in GitHub repository Settings -> Secrets and variables -> Actions.
+2. Use an npm granular access token with permission to publish `@bearst/yapi-mcp-server`.
+3. Update the version in `package.json` and merge to `main`.
+4. Create a GitHub Release, or manually run the `Publish` workflow.
+
+CI runs on push and pull request:
+
+- `npm ci`
+- `npm run typecheck`
+- `npm run lint`
+- `npm run smoke`
+- `npm pack --dry-run`

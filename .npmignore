@@ -1,0 +1,8 @@
+src/
+scripts/
+.github/
+.env
+.env.*
+tsconfig.json
+eslint.config.js
+*.tgz

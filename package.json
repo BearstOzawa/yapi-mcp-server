@@ -3,12 +3,25 @@
   "version": "0.1.2",
   "description": "A robust MCP server for YApi with token and cookie authentication.",
   "type": "module",
+  "homepage": "https://github.com/BearstOzawa/yapi-mcp-server#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BearstOzawa/yapi-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BearstOzawa/yapi-mcp-server/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "bin": {
     "yapi-mcp-server": "dist/index.js"
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsc",
