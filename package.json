@@ -4,7 +4,7 @@
   "description": "A robust MCP server for YApi with token and cookie authentication.",
   "type": "module",
   "bin": {
-    "yapi-mcp-server": "./dist/index.js"
+    "yapi-mcp-server": "dist/index.js"
   },
   "files": [
     "dist",
